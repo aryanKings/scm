@@ -3,6 +3,8 @@
     require 'connect.php';
     $database =  new connect();
 
+
+    
     /*
      * GET RESULTS  
      */
@@ -59,8 +61,95 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="js/validations.js"></script>
-   
+<script>
+   /* 
+            Auto increment text field
+*/
+function expand(textbox) {
+    if (!textbox.startW) { textbox.startW = textbox.offsetWidth; }
+     
+    var style = textbox.style;
+    
+    //Force complete recalculation of width
+    //in case characters are deleted and not added:
+    style.width = 0;
+    
 
+    var desiredW = textbox.scrollWidth;
+    //Optional padding to reduce "jerkyness" when typing:
+    desiredW += textbox.offsetHeight;
+    
+    style.width = Math.max(desiredW, textbox.startW) + 'px';
+    
+   
+}
+
+<?php 
+                                                    // material group
+                                                    $groupMax =  $materialValidation['maxlen'];
+                                                    $groupMin = $materialValidation['minlen'];
+                                                    $pattern =  patternMatching($groupMax, $groupMin, $materialValidation);
+                                                    
+                                                    // material description
+                                                    $groupDescMax =  $materialDescription['maxlen'];
+                                                    $groupDescMin =  $materialDescription['minlen'];
+                                                    $groupDesPattern =  patternMatching($groupDescMax, $groupDescMin, $materialDescription);
+                                                    
+?>
+
+/*
+ * 
+ * Material Group Auto  fields add
+ */
+
+function materialgroupname(j)
+{
+    if (j <= document.getElementById("materialgroup").rows.length) {
+        for (var i= document.getElementById("materialgroup").rows.length; i>j ;i--) {
+            var elName = "addRow[" + i + "]";
+            var newName = "addRow[" + (i+1) + "]";
+            var newClick = "materialgroupname(" + (i+1) + ")";
+            var modEl = document.getElementsByName(elName);
+
+            modEl.setAttribute("onclick", newClick);
+            document.getElementsByName("addRow[" + i + "]").setAttribute('name', "addRow[" + (i+1) + "]");
+        }
+    }
+    
+    var table=document.getElementById("materialgroup");
+    var row=table.insertRow(j);
+    var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        var cell3 = row.insertCell(2);
+     var i = "<form method='post' action='MaterialGroupBack.php'><td><center><input type = 'text' Maxlength='<?php echo $groupMax; ?>' required pattern='<?php echo $pattern;?>' minlength='<?php echo $groupMin;?>' name='MaterialGroup1' id='MaterialGroup1' value='' onkeyup='expand(this);' class='form-control input-md'></center></td><td><center><input type = 'text' name='MaterialGroupDescription1' minlength='<?php echo $groupDescMin;?>' maxlength='<?php echo $groupDescMax; ?>'  pattern='<?php echo $groupDesPattern; ?>'  id='MaterialGroupDescription1' value='' onkeyup='expand(this);' class='form-control input-md'></center></td><td><center><button type='submit' name='login-submit' id='login-submit'  class='btn btn-default'>Submit</button><input type='button' name='addRow["+ j + "]' class='add' onclick=\"materialgroupname(" + (j+1) + ")\" value='+' /></center></td></form>";   
+    row.innerHTML=i;
+   
+}
+</script>
+<style>
+.form-control {
+    display: block;
+    width:50px;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+input {
+    box-sizing: border-box;
+    width: 6em;
+}
+</style>
   </head>
 <body>
 
@@ -89,11 +178,20 @@
     </div><!-- /.navbar-collapse -->
 </div>
 </nav>
+
+<?php 
+        $addCounter = 1;
+       if(isset($_GET['addRow'])){
+           $increment =  intval($_GET['increment']);
+           $addCounter = $increment+1;
+       }
+
+?>
 <div main="" style="margin-top:100px;">
 <div class="container">
-                <center><h4>Material Group</h4></center>    
+                
                             <div class="col-md-8 table-responsive">
-                                    
+                                       <center><h4>Material Group</h4></center> 
                                 <table class="table table-striped"  id="materialgroup">
                                      <thead>
                                         <tr>
@@ -109,33 +207,35 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                        <form method="post" action="back.php">
-                                            <td>
-                                                <?php 
-                                                    // material group
-                                                    $groupMax =  $materialValidation['maxlen'];
-                                                    $groupMin = $materialValidation['minlen'];
-                                                    $pattern =  patternMatching($groupMax, $groupMin, $materialValidation);
-                                                    
-                                                    // material description
-                                                    $groupDescMax =  $materialDescription['maxlen'];
-                                                    $groupDescMin =  $materialDescription['minlen'];
-                                                    $groupDesPattern =  patternMatching($groupDescMax, $groupDescMin, $materialDescription);
-                                                    
-                                                ?>
-                                                <center><input type = "text" Maxlength="<?php echo $groupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $groupMin;?>" name="MaterialGroup1" id="MaterialGroup1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
-                                            </td>
-                                            <td>
-                                                <center><input type = "text" name="MaterialGroupDescription1" minlength="<?php echo $groupDescMin;?>" maxlength="<?php echo $groupDescMax; ?>"  pattern="<?php echo $groupDesPattern; ?>"  id="MaterialGroupDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
-                                            </td>
-                                            <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                <input type="button" name="addRow[1]" onclick="materialgroupname(2)" class="add" value='+' />
-                                            </td>
-                                        </form>
                                         
-                                        </tr>
+                                        <?php 
+                                                $materialGroupData =  $database->getRowsDatabase("SELECT * FROM materialgroup");
+                                            for($i=1; $i<= $addCounter; $i++){?>
+                                                <tr>
+                                                    <form method="post" action="MaterialGroupBack.php">
+                                                        <td>
+                                                            
+                                                            <center><input type = "text" Maxlength="<?php echo $groupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $groupMin;?>" name="MaterialGroup" id="MaterialGroup1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                        </td>
+                                                        <td>
+                                                            <center><input type = "text" name="MaterialGroupDescription" minlength="<?php echo $groupDescMin;?>" maxlength="<?php echo $groupDescMax; ?>"  pattern="<?php echo $groupDesPattern; ?>"  id="MaterialGroupDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                        </td>
+                                                        <td>
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+                                                            
+                                                        </td>
+                                                    </form>
+                                                    
+                                                    <form action="MaterialGroup.php" method="get">
+                                                       
+                                                        <input type="submit" name="addRow"  class="add" value='+' />
+                                                    </form>
+                                                    
+                                                    </tr>
+                                        
+                                           <?php }
+                                        
+                                        ?>
                                     </tbody>
                                     </table>
                                     
