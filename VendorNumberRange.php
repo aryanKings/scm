@@ -17,6 +17,8 @@
                                                                     return '[0-9]{'.$min.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.'}';
                                                                 }
                                                                 
                                                         }else{
@@ -26,6 +28,8 @@
                                                                     return '[0-9]{'.$min.','.$max.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.','.$max.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.','.$max.'}';
                                                                 }
                                                         }
                                                     }
@@ -33,16 +37,16 @@
      
   
     
-      $MNRStartingNumber =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='MNRStartingNumber'");
+      $VNRStartingNumber =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='VNRStartingNumber'");
 
-   $MNRInterval= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='MNRInterval'");
-  $MNRNextNumber= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='MNRNextNumber'");
+   $VNRInterval= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='VNRInterval'");
+  $VNRNextNumber= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='VNRNextNumber'");
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Material Number Range SCM Tools</title>
+  <title>Vendor Number Range SCM Tools</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -56,12 +60,11 @@
     <script src="js/validations.js"></script>
 <script>
 
-                                               
-                                                function nextNum(starting,intervals,final){
+                                               function nextNum(starting,intervals,finals){
+                                                  
                                                    
-                                                    
-                                                    var startNumber =  document.getElementById("starting").value;
-                                                    var intervalNumber = document.getElementById("intervals").value;
+                                                    var startNumber =  document.getElementById(starting).value;
+                                                    var intervalNumber = document.getElementById(intervals).value;
                                                     
                                                     
                                                     /*
@@ -98,8 +101,9 @@
                                                     
                                                     
                                                     
-                                                    document.getElementById("finals").value = result;
+                                                    document.getElementById(finals).value = result;
                                                 }
+                                                
                                                 
                                                 
                                                 
@@ -151,10 +155,7 @@ function expand(textbox) {
     -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
-input {
-    box-sizing: border-box;
-    width: 6em;
-}
+
 </style>
   </head>
 <body>
@@ -185,52 +186,46 @@ input {
 </div>
 </nav>
 <?php 
-                                                    // material Starting number
-                                                    $MNRStartingNumberMax =  $MNRStartingNumber[0]['maxlen'];
-                                                    $MNRStartingNumberMin = $MNRStartingNumber[0]['minlen'];
-                                                    $pattern =  patternMatching($MNRStartingNumberMax, $MNRStartingNumberMin, $MNRStartingNumber[0]);
+                                                    // Vendor Starting number
+                                                    $VNRStartingNumberMax =  $VNRStartingNumber[0]['maxlen'];
+                                                    $VNRStartingNumberMin = $VNRStartingNumber[0]['minlen'];
+                                                    $pattern =  patternMatching($VNRStartingNumberMax, $VNRStartingNumberMin, $VNRStartingNumber[0]);
                                                     
-                                                    // MNR Interval
-                                                    $MNRIntervalMax =  $MNRInterval[0]['maxlen'];
-                                                    $MNRIntervalMin =  $MNRInterval[0]['minlen'];
-                                                    $MNRIntervalPattern =  patternMatching($MNRIntervalMax, $MNRIntervalMin, $MNRInterval[0]);
-  //MNR NextNumber
-                                                    $MNRNextNumberMax =  $MNRNextNumber[0]['maxlen'];
-                                                    $MNRNextNumberMin =  $MNRNextNumber[0]['minlen'];
-                                                    $MNRNextNumberPattern =  patternMatching($MNRNextNumberMax, $MNRNextNumberMin, $MNRNextNumber[0]);
+                                                    // VNR Interval
+                                                    $VNRIntervalMax =  $VNRInterval[0]['maxlen'];
+                                                    $VNRIntervalMin =  $VNRInterval[0]['minlen'];
+                                                    $VNRIntervalPattern =  patternMatching($VNRIntervalMax, $VNRIntervalMin, $VNRInterval[0]);
+  //VNR NextNumber
+                                                    $VNRNextNumberMax =  $VNRNextNumber[0]['maxlen'];
+                                                    $VNRNextNumberMin =  $VNRNextNumber[0]['minlen'];
+                                                    $VNRNextNumberPattern =  patternMatching($VNRNextNumberMax, $VNRNextNumberMin, $VNRNextNumber[0]);
                                                     
 ?>
 <?php 
-$mnrNums =  $database->getRowsnums("SELECT * FROM materialnumberrange");
+$VNRNums =  $database->getRowsnums("SELECT * FROM vendornumberrange");
 
-if($mnrNums == 0 or $mnrNums== -1){
+if($VNRNums == 0 or $VNRNums== -1){
     $addCounter = 1;
 }else{
-    $addCounter = $mnrNums;
+    $addCounter = $VNRNums;
 }
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
            $addCounter = $increment+1;
        }
-
-$groupRow =  $database->getRowsDatabase("SELECT * FROM materialgroup");
-$groupType = $database->getRowsDatabase("SELECT * FROM materialtype");
-
+$groupRow =  $database->getRowsDatabase("SELECT * FROM vendorgroup");
 ?>
 <div main="" style="margin-top:100px;">
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Number Range</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4>Vendor Number Range</h4></center> 
+                                <table class="table table-striped"  id="VendorType">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Group
-                                            </td>
-                                            <td>
-                                            Material Type 
+                                            Vendor Group
                                             </td>
                                              <td>
                                            Starting Number
@@ -251,57 +246,35 @@ $groupType = $database->getRowsDatabase("SELECT * FROM materialtype");
                                     </thead>
                                     <tbody>
   <?php 
-                                            $mnrData =  $database->getRowsDatabase("SELECT * FROM materialnumberrange");
-                                           
+                                            $VNRData =  $database->getRowsDatabase("SELECT * FROM vendornumberrange");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($mnrData[$i])){
+                                                if(isset($VNRData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialNumberRangeBack.php">
+                                        <form method="post" action="VendorNumberRangeBack.php">
                                             <td>
                                                 
-                                                <select name="materialgroup" id="materialgroup" style="width:85px;" required class="form-control">
+                                                <select name="Vendorgroup" id="Vendorgroup" style="width:85px;" required class="form-control">
                                                     <option value="" disabled selected hidden>Select</option>
                                                         <?php 
                                                             if($groupRow != null){
                                                             for($gr=0;$gr< count($groupRow); $gr++){ ?>
-                                                                <option <?php if($mnrData[$gr][1] == $groupRow[$gr][1]){ echo 'selected';}?> value="<?php echo  $groupRow[$gr][1];?>"><?php echo  $groupRow[$gr][1];?></option>  
+                                                                <option <?php if($VNRData[$i][1] == $groupRow[$gr][1]){ echo 'selected';}?> value="<?php echo  $groupRow[$gr][1];?>"><?php echo  $groupRow[$gr][1];?></option>  
                                                        <?php }// loop close 
                                                            }//if close
                                                        ?>  
                                                 </select>
                                             </td>
-                                                
-                                                
-                                            <td>
-                                               <!-- type drop down-->
-                                               <select name="materialtype" id="materialtype" style="width:85px;" required class="form-control">
-                                                   <option value="" disbaled selected hidden>Select</option>
-                                                   
-                                                   <?php 
-                                                            if($groupType != null){  
-                                                                for($ty=0;$ty < count($groupType); $ty++){
-                                                                ?>
-                                                                <option <?php if($mnrData[$gr][2] == $groupType[$gr][1]){ echo 'selected';}?> value="<?php echo $groupType[$ty][1]?>"><?php echo $groupType[$ty][1]?></option>
-                                                            <?php 
-                                                                }//loop close
-                                                            } // if close
-                                                             ?>
-                                                         
-                                                   
-                                               </select>
-                                            </td>
-                                          
-                                            
-                                            <td>
-                                             <center><input type = "text" Maxlength="<?php echo  $MNRStartingNumberMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $MNRStartingNumberMin;?>" name="StartingNumber" id="StartingNumber<?php echo $i; ?>" value="<?php echo $mnrData[$i][3]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                             
+                                           <td>
+                                             <center><input type = "text" Maxlength="<?php echo  $VNRStartingNumberMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $VNRStartingNumberMin;?>" name="StartingNumber" id="StartingNumber<?php echo $i; ?>" value="<?php echo $VNRData[$i][2]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                             <center><input type = "text" Maxlength="<?php echo $MNRIntervalMax; ?>" required pattern="<?php echo $MNRIntervalPattern;?>" minlength="<?php echo $MNRIntervalMin;?>" name="Interval" id="Interval<?php echo $i; ?>" value="<?php echo $mnrData[$i][4]; ?>" onkeyup="expand(this);" class="form-control input-md" onfocusout="nextNum('StartingNumber<?php echo $i;?>','Interval<?php echo $i; ?>','NextNumber<?php echo $i;?>');"></center>
+                                             <center><input type = "text" Maxlength="<?php echo $VNRIntervalMax; ?>" required pattern="<?php echo $VNRIntervalPattern;?>" minlength="<?php echo $VNRIntervalMin;?>" name="Interval" id="Interval<?php echo $i; ?>" value="<?php echo $VNRData[$i][3]; ?>" onkeyup="expand(this);" class="form-control input-md" onfocusout="nextNum('StartingNumber<?php echo $i;?>','Interval<?php echo $i; ?>','NextNumber<?php echo $i;?>');"></center>
                                             </td>
                                             <td>
-                                             <center><input type = "text" Maxlength="<?php echo $MNRNextNumberMax; ?>" required pattern="<?php echo $MNRNextNumberPattern;?>" minlength="<?php echo $MNRNextNumberMin;?>" name="NextNumber" id="NextNumber<?php echo $i; ?>" value="<?php echo $mnrData[$i][5]; ?>" onkeyup="expand(this);"  class="form-control input-md"></center>
+                                             <center><input type = "text" Maxlength="<?php echo $VNRNextNumberMax; ?>" required pattern="<?php echo $VNRNextNumberPattern;?>" minlength="<?php echo $VNRNextNumberMin;?>" name="NextNumber" id="NextNumber<?php echo $i; ?>" value="<?php echo $VNRData[$i][4]; ?>" onkeyup="expand(this);"  class="form-control input-md"></center>
                                             </td>
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
@@ -317,7 +290,7 @@ $groupType = $database->getRowsDatabase("SELECT * FROM materialtype");
                                         
                                           <td>
 
-                                                            <form action="MaterialNumberRange.php" method="get">
+                                                            <form action="VendorNumberRange.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
@@ -331,10 +304,10 @@ $groupType = $database->getRowsDatabase("SELECT * FROM materialtype");
                                                
                                                
                                                 <tr>
-                                                    <form method="post" action="MaterialNumberRangeBack.php">
+                                                    <form method="post" action="VendorNumberRangeBack.php">
  <td>
                                                 
-                                                <select name="materialgroup" id="materialgroup" style="width:85px;" required class="form-control">
+                                                <select name="Vendorgroup" id="Vendorgroup" style="width:85px;" required class="form-control">
                                                     <option value="" disabled selected hidden>Select</option>
                                                         <?php 
                                                             if($groupRow != null){
@@ -345,34 +318,15 @@ $groupType = $database->getRowsDatabase("SELECT * FROM materialtype");
                                                        ?>  
                                                 </select>
                                             </td>
-                                                
-                                                
+                                        
                                             <td>
-                                               <!-- type drop down-->
-                                               <select name="materialtype" id="materialtype" style="width:85px;" required class="form-control">
-                                                   <option value="" disbaled selected hidden>Select</option>
-                                                   
-                                                   <?php 
-                                                            if($groupType != null){  
-                                                                for($ty=0;$ty < count($groupType); $ty++){
-                                                                ?>
-                                                                <option value="<?php echo $groupType[$ty][1]?>"><?php echo $groupType[$ty][1]?></option>
-                                                            <?php 
-                                                                }//loop close
-                                                            } // if close
-                                                             ?>
-                                                         
-                                                   
-                                               </select>
+                                             <center><input type = "text" Maxlength="<?php echo  $VNRStartingNumberMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $VNRStartingNumberMin;?>" name="StartingNumber" id="StartingNumber<?php echo $i; ?>" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                             <center><input type = "text" Maxlength="<?php echo  $MNRStartingNumberMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $MNRStartingNumberMin;?>" name="StartingNumber" id="StartingNumber<?php echo $i; ?>" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                             <center><input type = "text" Maxlength="<?php echo $VNRIntervalMax; ?>" required pattern="<?php echo $VNRIntervalPattern;?>" minlength="<?php echo $VNRIntervalMin;?>" name="Interval" id="Interval<?php echo $i; ?>" value="" onkeyup="expand(this);" class="form-control input-md" onfocusout="nextNum('StartingNumber<?php echo $i;?>','Interval<?php echo $i; ?>','NextNumber<?php echo $i;?>');"></center>
                                             </td>
                                             <td>
-                                             <center><input type = "text" Maxlength="<?php echo $MNRIntervalMax; ?>" required pattern="<?php echo $MNRIntervalPattern;?>" minlength="<?php echo $MNRIntervalMin;?>" name="Interval" id="Interval<?php echo $i; ?>" value="" onkeyup="expand(this);" class="form-control input-md" onfocusout="nextNum('StartingNumber<?php echo $i;?>','Interval<?php echo $i; ?>','NextNumber<?php echo $i;?>');"></center>
-                                            </td>
-                                            <td>
-                                             <center><input type = "text" Maxlength="<?php echo $MNRNextNumberMax; ?>" required pattern="<?php echo $MNRNextNumberPattern;?>" minlength="<?php echo $MNRNextNumberMin;?>" name="NextNumber" id="NextNumber<?php echo $i; ?>" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                             <center><input type = "text" Maxlength="<?php echo $VNRNextNumberMax; ?>" required pattern="<?php echo $VNRNextNumberPattern;?>" minlength="<?php echo $VNRNextNumberMin;?>" name="NextNumber" id="NextNumber<?php echo $i; ?>" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                                         
                                                         <td>
@@ -384,7 +338,7 @@ $groupType = $database->getRowsDatabase("SELECT * FROM materialtype");
                                         if($i == $showAdd){?>
                                                  <td>
 
-                                                            <form action="MaterialNumberRange.php" method="get">
+                                                            <form action="VendorNumberRange.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 

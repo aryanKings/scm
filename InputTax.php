@@ -4,16 +4,7 @@
     $database =  new connect();
 
 
-    /*
-     * GET RESULTS  
-     */
-     function materialValidationResult($query){
-        $materialQueryresult = mysql_query($query);
-        $row = mysql_fetch_array($materialQueryresult);
-        return $row;
-    }
      
-    
      /*
       * PATTERN MATCHING 
       */
@@ -26,6 +17,8 @@
                                                                     return '[0-9]{'.$min.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.'}';
                                                                 }
                                                                 
                                                         }else{
@@ -35,17 +28,19 @@
                                                                     return '[0-9]{'.$min.','.$max.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.','.$max.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.','.$max.'}';
                                                                 }
                                                         }
                                                     }
      
      
-   
-    $materialValidation =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='materialType'");
-    
-    
   
-   $materialDescription =  $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='materialTypeDescription'");
+    
+      $InputTax=  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='InputTax'");
+
+   $InputTaxDescription= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='InputTaxDescription'");
+  $InputTaxPercentage= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='InputTaxPercentage'");
 ?>
 
 <!DOCTYPE html>
@@ -87,18 +82,19 @@ function expand(textbox) {
 }
 
 <?php 
-                                                    // material Type
-                                                    $TypeMax =  $materialValidation[0]['maxlen'];
-                                                    $TypeMin = $materialValidation[0]['minlen'];
-                                                    $pattern =  patternMatching($TypeMax, $TypeMin, $materialValidation[0]);
-                                                  
+                                                    // Input Tax
+                                                    $InputTaxMax =  $InputTax[0]['maxlen'];
+                                                    $InputTaxMin = $InputTax[0]['minlen'];
+                                                    $pattern =  patternMatching($InputTaxMax, $InputTaxMin, $InputTax[0]);
                                                     
-                                                    
-                                                    // material description
-                                                    $TypeDescMax =  $materialDescription[0]['maxlen'];
-                                                    $TypeDescMin =  $materialDescription[0]['minlen'];
-                                                    $TypeDesPattern =  patternMatching($TypeDescMax, $TypeDescMin, $materialDescription[0]);
-
+                                                    // Payment Terms description
+                                                    $InputTaxDescriptionMax =  $InputTaxDescription[0]['maxlen'];
+                                                    $InputTaxDescriptionMin =  $InputTaxDescription[0]['minlen'];
+                                                    $InputTaxDescriptionPattern =  patternMatching($InputTaxDescriptionMax, $InputTaxDescriptionMin, $InputTaxDescription[0]);
+                                                    // Payment Terms Days
+                                                    $InputTaxPercentageMax =  $InputTaxPercentage[0]['maxlen'];
+                                                    $InputTaxPercentageMin =  $InputTaxPercentage[0]['minlen'];
+                                                    $InputTaxPercentagePattern =  patternMatching($InputTaxPercentageMax, $InputTaxPercentageMin, $InputTaxPercentage[0]);
                                                     
 ?>
 
@@ -155,19 +151,13 @@ function expand(textbox) {
 </div>
 </nav>
 <?php 
+$InputTaxNums =  $database->getRowsnums("SELECT * FROM inputtax");
 
-
-      $typeNumber = $database->getRowsnums("SELECT * FROM materialtype");
-      
-     if($typeNumber == -1){
-          $addCounter = 1;
-     }else if($typeNumber == 0){
-     
-     $addCounter = 1;
-     
-     }else{
-         $addCounter =  $typeNumber;
-     }
+if($InputTaxNums == 0 or $orNums== -1){
+    $addCounter = 1;
+}else{
+    $addCounter = $InputTaxNums;
+}
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
@@ -179,15 +169,18 @@ function expand(textbox) {
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Type</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4>Input Taxes</h4></center> 
+                                <table class="table table-striped"  id="InputTax">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Type
+                                            Input Tax
                                             </td>
                                             <td>
-                                            Material Type Description  
+                                         Input Tax Description
+                                            </td>
+ <td>
+                                       Percentage
                                             </td>
                                             <td>
                                             &nbsp;
@@ -199,87 +192,86 @@ function expand(textbox) {
                                     </thead>
                                     <tbody>
                                       <?php 
-                                        $materialType =  $database->getRowsDatabase("SELECT * FROM materialtype");
+                                            $inputTaxData =  $database->getRowsDatabase("SELECT * FROM inputtax");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($materialType[$i])){
+                                                if(isset($inputTaxData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
+                                        <form method="post" action="InputTaxBack.php">
                                             <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="<?php echo $materialType[$i][1];?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $InputTaxMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $InputTaxMin;?>" name="InputTax" id="InputTax" value="<?php echo  $inputTaxData[$i][1];?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" style="width: 150px;" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="<?php echo $materialType[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="InputTaxDescription" required minlength="<?php echo $InputTaxDescriptionMin;?>" maxlength="<?php echo $InputTaxDescriptionMax; ?>"  pattern="<?php echo $InputTaxDescriptionPattern; ?>"  id="InputTaxDescription" value="<?php echo  $inputTaxData[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                            </td>
+ <td>
+                                                <center><input type = "text" name="InputTaxPercentage" required minlength="<?php echo $InputTaxPercentageMin;?>" maxlength="<?php echo $InputTaxPercentageMax; ?>"  pattern="<?php echo $InputTaxPercentagePattern; ?>"  id="InputTaxPercentage" value="<?php echo  $inputTaxData[$i][3];?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
                                                 
-                                            </td>
-                                        </form>
-                                        <?php 
+                                          </form>
+                                                        </td>
+                                                        <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="InputTax.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                         </td><?php }else{?> <td></td>  <?php } ?>
+                                                </td>
+                                                    
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
                                         
-                                        </tr>
-                                        <?php }else{?>
-                                            
-                                            <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
-                                            <td>
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="InputTaxBack.php">
+                                                        <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $InputTaxMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $InputTaxMin;?>" name="InputTax" id="InputTax" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="InputTaxDescription" required minlength="<?php echo $InputTaxDescriptionMin;?>" maxlength="<?php echo $InputTaxDescriptionMax; ?>"  pattern="<?php echo $InputTaxDescriptionPattern; ?>"  id="InputTaxDescription" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                            </td>
+ <td>
+                                                <center><input type = "text" name="InputTaxPercentage" required minlength="<?php echo $InputTaxPercentageMin;?>" maxlength="<?php echo $InputTaxPercentageMax; ?>"  pattern="<?php echo $InputTaxPercentagePattern; ?>"  id="InputTaxPercentage" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
-                                            </td>
-                                        </form>
-                                        
-                                        <?php 
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                   <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
-                                               
-                                               
-                                               
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="InputTax.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                            </td>
-                                        <?php }else{?> <td></td>  <?php } ?>
-                                        
-                                           
-
-
-
-                                        
-                                        </tr>
-                                            
-                                            
-                                       <?php }//else close
-                                     } //loop close
-                                        
-                                        ?>
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
+                                                    
+                                                    </tr>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
+                                    
                                     
                                 </div>
             </div>

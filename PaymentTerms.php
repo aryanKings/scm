@@ -4,17 +4,7 @@
     $database =  new connect();
 
 
-    /*
-     * GET RESULTS  
-     */
-     function materialValidationResult($query){
-        $materialQueryresult = mysql_query($query);
-        $row = mysql_fetch_array($materialQueryresult);
-        return $row;
-    }
-     
-    
-     /*
+ /*
       * PATTERN MATCHING 
       */
      function patternMatching($max,$min, $row){
@@ -26,6 +16,8 @@
                                                                     return '[0-9]{'.$min.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.'}';
                                                                 }
                                                                 
                                                         }else{
@@ -35,17 +27,21 @@
                                                                     return '[0-9]{'.$min.','.$max.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.','.$max.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.','.$max.'}';
                                                                 }
                                                         }
                                                     }
      
      
-   
-    $materialValidation =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='materialType'");
-    
-    
+     
+     
   
-   $materialDescription =  $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='materialTypeDescription'");
+    
+      $PaymentTerms=  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='PaymentTerms'");
+
+   $PaymentTermsDescription= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='PaymentTermsDescription'");
+  $PaymentTermsDays= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='PaymentTermsDays'");
 ?>
 
 <!DOCTYPE html>
@@ -87,18 +83,19 @@ function expand(textbox) {
 }
 
 <?php 
-                                                    // material Type
-                                                    $TypeMax =  $materialValidation[0]['maxlen'];
-                                                    $TypeMin = $materialValidation[0]['minlen'];
-                                                    $pattern =  patternMatching($TypeMax, $TypeMin, $materialValidation[0]);
-                                                  
+                                                    // Payment Terms
+                                                    $PaymentTermsMax =  $PaymentTerms[0]['maxlen'];
+                                                    $PaymentTermsMin = $PaymentTerms[0]['minlen'];
+                                                    $pattern =  patternMatching($PaymentTermsMax, $PaymentTermsMin, $PaymentTerms[0]);
                                                     
-                                                    
-                                                    // material description
-                                                    $TypeDescMax =  $materialDescription[0]['maxlen'];
-                                                    $TypeDescMin =  $materialDescription[0]['minlen'];
-                                                    $TypeDesPattern =  patternMatching($TypeDescMax, $TypeDescMin, $materialDescription[0]);
-
+                                                    // Payment Terms description
+                                                    $PaymentTermsDescriptionMax =  $PaymentTermsDescription[0]['maxlen'];
+                                                    $PaymentTermsDescriptionMin =  $PaymentTermsDescription[0]['minlen'];
+                                                    $PaymentTermsDescriptionPattern =  patternMatching($PaymentTermsDescriptionMax, $PaymentTermsDescriptionMin, $PaymentTermsDescription[0]);
+                                                    // Payment Terms Days
+                                                    $PaymentTermsDaysMax =  $PaymentTermsDays[0]['maxlen'];
+                                                    $PaymentTermsDaysMin =  $PaymentTermsDays[0]['minlen'];
+                                                    $PaymentTermsDaysPattern =  patternMatching($PaymentTermsDaysMax, $PaymentTermsDaysMin, $PaymentTermsDays[0]);
                                                     
 ?>
 
@@ -155,19 +152,13 @@ function expand(textbox) {
 </div>
 </nav>
 <?php 
+$PaymentTermsNums =  $database->getRowsnums("SELECT * FROM paymentterms");
 
-
-      $typeNumber = $database->getRowsnums("SELECT * FROM materialtype");
-      
-     if($typeNumber == -1){
-          $addCounter = 1;
-     }else if($typeNumber == 0){
-     
-     $addCounter = 1;
-     
-     }else{
-         $addCounter =  $typeNumber;
-     }
+if($PaymentTermsNums == 0 or $orNums== -1){
+    $addCounter = 1;
+}else{
+    $addCounter = $PaymentTermsNums;
+}
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
@@ -179,15 +170,18 @@ function expand(textbox) {
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Type</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4> Payment Terms</h4></center> 
+                                <table class="table table-striped"  id="PaymentTerms">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Type
+                                            Payment Terms
                                             </td>
                                             <td>
-                                            Material Type Description  
+                                         Payment Terms Description  
+                                            </td>
+ <td>
+                                        Days  
                                             </td>
                                             <td>
                                             &nbsp;
@@ -199,87 +193,86 @@ function expand(textbox) {
                                     </thead>
                                     <tbody>
                                       <?php 
-                                        $materialType =  $database->getRowsDatabase("SELECT * FROM materialtype");
+                                            $paymentTermsData =  $database->getRowsDatabase("SELECT * FROM paymentterms");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($materialType[$i])){
+                                                if(isset($paymentTermsData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
+                                        <form method="post" action="PaymentTermsBack.php">
                                             <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="<?php echo $materialType[$i][1];?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $PaymentTermsMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $PaymentTermsMin;?>" name="PaymentTerms" id="PaymentTerms" value="<?php echo  $paymentTermsData[$i][1]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" style="width: 150px;" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="<?php echo $materialType[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="PaymentTermsDescription" required minlength="<?php echo $PaymentTermsDescriptionMin;?>" maxlength="<?php echo $PaymentTermsDescriptionMax; ?>"  pattern="<?php echo $PaymentTermsDescriptionPattern; ?>"  id="PaymentTermsDescription" value="<?php echo  $paymentTermsData[$i][2]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                            </td>
+ <td>
+                                                <center><input type = "text" name="PaymentTermsDays" required minlength="<?php echo $PaymentTermsDaysMin;?>" maxlength="<?php echo $PaymentTermsDaysMax; ?>"  pattern="<?php echo $PaymentTermsDaysPattern; ?>"  id="PaymentTermsDays" value="<?php echo  $paymentTermsData[$i][3]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
                                                 
-                                            </td>
-                                        </form>
-                                        <?php 
+                                          </form>
+                                                        </td>
+                                                        <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="PaymentTerms.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                         </td><?php }else{?> <td></td>  <?php } ?>
+                                                </td>
+                                                    
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
                                         
-                                        </tr>
-                                        <?php }else{?>
-                                            
-                                            <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
-                                            <td>
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="PaymentTermsBack.php">
+                                                        <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $PaymentTermsMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $PaymentTermsMin;?>" name="PaymentTerms" id="PaymentTerms" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="PaymentTermsDescription" required minlength="<?php echo $PaymentTermsDescriptionMin;?>" maxlength="<?php echo $PaymentTermsDescriptionMax; ?>"  pattern="<?php echo $PaymentTermsDescriptionPattern; ?>"  id="PaymentTermsDescription" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                            </td>
+ <td>
+                                                <center><input type = "text" name="PaymentTermsDays" required minlength="<?php echo $PaymentTermsDaysMin;?>" maxlength="<?php echo $PaymentTermsDaysMax; ?>"  pattern="<?php echo $PaymentTermsDaysPattern; ?>"  id="PaymentTermsDays" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
-                                            </td>
-                                        </form>
-                                        
-                                        <?php 
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                   <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
-                                               
-                                               
-                                               
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="PaymentTerms.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                            </td>
-                                        <?php }else{?> <td></td>  <?php } ?>
-                                        
-                                           
-
-
-
-                                        
-                                        </tr>
-                                            
-                                            
-                                       <?php }//else close
-                                     } //loop close
-                                        
-                                        ?>
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
+                                                    
+                                                    </tr>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
+                                    
                                     
                                 </div>
             </div>

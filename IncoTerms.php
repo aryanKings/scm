@@ -4,16 +4,7 @@
     $database =  new connect();
 
 
-    /*
-     * GET RESULTS  
-     */
-     function materialValidationResult($query){
-        $materialQueryresult = mysql_query($query);
-        $row = mysql_fetch_array($materialQueryresult);
-        return $row;
-    }
-     
-    
+  
      /*
       * PATTERN MATCHING 
       */
@@ -26,6 +17,8 @@
                                                                     return '[0-9]{'.$min.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.'}';
                                                                 }
                                                                 
                                                         }else{
@@ -35,17 +28,18 @@
                                                                     return '[0-9]{'.$min.','.$max.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.','.$max.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.','.$max.'}';
                                                                 }
                                                         }
                                                     }
      
      
-   
-    $materialValidation =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='materialType'");
-    
-    
   
-   $materialDescription =  $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='materialTypeDescription'");
+    
+      $IncoTerms=  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='IncoTerms'");
+
+   $IncoTermsDescription= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='IncoTermsDescription'");
 ?>
 
 <!DOCTYPE html>
@@ -87,18 +81,15 @@ function expand(textbox) {
 }
 
 <?php 
-                                                    // material Type
-                                                    $TypeMax =  $materialValidation[0]['maxlen'];
-                                                    $TypeMin = $materialValidation[0]['minlen'];
-                                                    $pattern =  patternMatching($TypeMax, $TypeMin, $materialValidation[0]);
-                                                  
+                                                    // Inco Terms
+                                                    $IncoTermsMax =  $IncoTerms[0]['maxlen'];
+                                                    $IncoTermsMin = $IncoTerms[0]['minlen'];
+                                                    $pattern =  patternMatching($IncoTermsMax, $IncoTermsMin, $IncoTerms[0]);
                                                     
-                                                    
-                                                    // material description
-                                                    $TypeDescMax =  $materialDescription[0]['maxlen'];
-                                                    $TypeDescMin =  $materialDescription[0]['minlen'];
-                                                    $TypeDesPattern =  patternMatching($TypeDescMax, $TypeDescMin, $materialDescription[0]);
-
+                                                    // Inco Terms description
+                                                    $IncoTermsDescriptionMax =  $IncoTermsDescription[0]['maxlen'];
+                                                    $IncoTermsDescriptionMin =  $IncoTermsDescription[0]['minlen'];
+                                                    $IncoTermsDescriptionPattern =  patternMatching($IncoTermsDescriptionMax, $IncoTermsDescriptionMin, $IncoTermsDescription[0]);
                                                     
 ?>
 
@@ -155,19 +146,13 @@ function expand(textbox) {
 </div>
 </nav>
 <?php 
+$IncoTermsNums =  $database->getRowsnums("SELECT * FROM incoterms");
 
-
-      $typeNumber = $database->getRowsnums("SELECT * FROM materialtype");
-      
-     if($typeNumber == -1){
-          $addCounter = 1;
-     }else if($typeNumber == 0){
-     
-     $addCounter = 1;
-     
-     }else{
-         $addCounter =  $typeNumber;
-     }
+if($IncoTermsNums == 0 or $orNums== -1){
+    $addCounter = 1;
+}else{
+    $addCounter = $IncoTermsNums;
+}
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
@@ -179,15 +164,15 @@ function expand(textbox) {
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Type</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4>Inco Terms</h4></center> 
+                                <table class="table table-striped"  id="IncoTerms">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Type
+                                           Inco Terms
                                             </td>
                                             <td>
-                                            Material Type Description  
+                                          Inco TermsDescription  
                                             </td>
                                             <td>
                                             &nbsp;
@@ -199,87 +184,80 @@ function expand(textbox) {
                                     </thead>
                                     <tbody>
                                       <?php 
-                                        $materialType =  $database->getRowsDatabase("SELECT * FROM materialtype");
+                                            $incoTermsData =  $database->getRowsDatabase("SELECT * FROM incoterms");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($materialType[$i])){
+                                                if(isset($incoTermsData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
+                                        <form method="post" action="IncoTermsBack.php">
                                             <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="<?php echo $materialType[$i][1];?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $IncoTermsMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $IncoTermsMin;?>" name="IncoTerms" id="IncoTerms" value="<?php echo $incoTermsData[$i][1]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" style="width: 150px;" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="<?php echo $materialType[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="IncoTermsDescription" reqired minlength="<?php echo $IncoTermsDescriptionMin;?>" maxlength="<?php echo $IncoTermsDescriptionMax; ?>"  pattern="<?php echo $IncoTermsDescriptionPattern; ?>"  id="IncoTermsDescription" value="<?php echo $incoTermsData[$i][2]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
                                                 
-                                            </td>
-                                        </form>
-                                        <?php 
+                                          </form>
+                                                        </td>
+                                                        <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="IncoTerms.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                         </td><?php }else{?> <td></td>  <?php } ?>
+                                                </td>
+                                                    
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
                                         
-                                        </tr>
-                                        <?php }else{?>
-                                            
-                                            <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
-                                            <td>
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="IncoTermsBack.php">
+                                                        <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $IncoTermsMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $IncoTermsMin;?>" name="IncoTerms" id="IncoTerms" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="IncoTermsDescription" required minlength="<?php echo $IncoTermsDescriptionMin;?>" maxlength="<?php echo $IncoTermsDescriptionMax; ?>"  pattern="<?php echo $IncoTermsDescriptionPattern; ?>"  id="IncoTermsDescription" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
-                                            </td>
-                                        </form>
-                                        
-                                        <?php 
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                   <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
-                                               
-                                               
-                                               
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="IncoTerms.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                            </td>
-                                        <?php }else{?> <td></td>  <?php } ?>
-                                        
-                                           
-
-
-
-                                        
-                                        </tr>
-                                            
-                                            
-                                       <?php }//else close
-                                     } //loop close
-                                        
-                                        ?>
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
+                                                    
+                                                    </tr>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
+                                    
                                     
                                 </div>
             </div>

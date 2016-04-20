@@ -4,16 +4,7 @@
     $database =  new connect();
 
 
-    /*
-     * GET RESULTS  
-     */
-     function materialValidationResult($query){
-        $materialQueryresult = mysql_query($query);
-        $row = mysql_fetch_array($materialQueryresult);
-        return $row;
-    }
      
-    
      /*
       * PATTERN MATCHING 
       */
@@ -26,6 +17,8 @@
                                                                     return '[0-9]{'.$min.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.'}';
                                                                 }
                                                                 
                                                         }else{
@@ -35,17 +28,19 @@
                                                                     return '[0-9]{'.$min.','.$max.'}';
                                                                 }else if($row['capdigit'] == '1'){
                                                                     return '[A-Z0-9]{'.$min.','.$max.'}';
+                                                                }else if($row['dotdigits'] == '1'){
+                                                                    return '[0-9\.]{'.$min.','.$max.'}';
                                                                 }
                                                         }
                                                     }
      
      
-   
-    $materialValidation =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='materialType'");
-    
-    
   
-   $materialDescription =  $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='materialTypeDescription'");
+    $StatusMessageCode= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='StatusMessageCode'");
+      $StatusMessage=  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='StatusMessage'");
+
+   $StatusMessageDescription= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='StatusMessageDescription'");
+  
 ?>
 
 <!DOCTYPE html>
@@ -87,18 +82,20 @@ function expand(textbox) {
 }
 
 <?php 
-                                                    // material Type
-                                                    $TypeMax =  $materialValidation[0]['maxlen'];
-                                                    $TypeMin = $materialValidation[0]['minlen'];
-                                                    $pattern =  patternMatching($TypeMax, $TypeMin, $materialValidation[0]);
-                                                  
+                            // Status Message Code
+                                                    $StatusMessageCodeMax =  $StatusMessageCode[0]['maxlen'];
+                                                    $StatusMessageCodeMin =  $StatusMessageCode[0]['minlen'];
+                                                    $StatusMessageCodePattern =  patternMatching($StatusMessageCodeMax, $StatusMessageCodeMin, $StatusMessageCode[0]);
+                                                    //Status Message
+                                                    $StatusMessageMax =  $StatusMessage[0]['maxlen'];
+                                                    $StatusMessageMin = $StatusMessage[0]['minlen'];
+                                                    $pattern =  patternMatching($StatusMessageMax, $StatusMessageMin, $StatusMessage[0]);
                                                     
-                                                    
-                                                    // material description
-                                                    $TypeDescMax =  $materialDescription[0]['maxlen'];
-                                                    $TypeDescMin =  $materialDescription[0]['minlen'];
-                                                    $TypeDesPattern =  patternMatching($TypeDescMax, $TypeDescMin, $materialDescription[0]);
-
+                                                    //description
+                                                    $StatusMessageDescriptionMax =  $StatusMessageDescription[0]['maxlen'];
+                                                    $StatusMessageDescriptionMin =  $StatusMessageDescription[0]['minlen'];
+                                                    $StatusMessageDescriptionPattern =  patternMatching($StatusMessageDescriptionMax, $StatusMessageDescriptionMin, $StatusMessageDescription[0]);
+                                                 
                                                     
 ?>
 
@@ -108,6 +105,24 @@ function expand(textbox) {
 .form-control {
     display: block;
     width:50px;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+.form-control1 {
+    display: block;
+    width:auto;
     height: 34px;
     padding: 6px 12px;
     font-size: 14px;
@@ -144,7 +159,7 @@ function expand(textbox) {
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <form class="navbar-form navbar-left" role="search">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search">
+          <input type="text" class="form-control1" placeholder="Search">
         </div>
         <button type="submit" class="btn btn-default"><img style="width:16px;height:16px;" src="images/magnifier13.png"></button>
       </form>
@@ -155,19 +170,13 @@ function expand(textbox) {
 </div>
 </nav>
 <?php 
+$StatusMessageNums =  $database->getRowsnums("SELECT * FROM statusmessages");
 
-
-      $typeNumber = $database->getRowsnums("SELECT * FROM materialtype");
-      
-     if($typeNumber == -1){
-          $addCounter = 1;
-     }else if($typeNumber == 0){
-     
-     $addCounter = 1;
-     
-     }else{
-         $addCounter =  $typeNumber;
-     }
+if($StatusMessageNums == 0 or $orNums== -1){
+    $addCounter = 1;
+}else{
+    $addCounter = $StatusMessageNums;
+}
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
@@ -179,15 +188,18 @@ function expand(textbox) {
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Type</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4>Status Messages</h4></center> 
+                                <table class="table table-striped"  id="StatusMessage">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Type
+                                           Message code
                                             </td>
                                             <td>
-                                            Material Type Description  
+                                         Status Message
+                                            </td>
+ <td>
+                                      Message Description
                                             </td>
                                             <td>
                                             &nbsp;
@@ -199,87 +211,88 @@ function expand(textbox) {
                                     </thead>
                                     <tbody>
                                       <?php 
-                                        $materialType =  $database->getRowsDatabase("SELECT * FROM materialtype");
+                                            $StatusMessageData =  $database->getRowsDatabase("SELECT * FROM statusmessages");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($materialType[$i])){
+                                                if(isset($StatusMessageData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
+                                        <form method="post" action="StatusMessagesBack.php">
+                                        <td>
+                                                <center><input type = "text" name="StatusMessageCode" required minlength="<?php echo $StatusMessageCodeMin;?>" maxlength="<?php echo $StatusMessageCodeMax; ?>"  pattern="<?php echo $StatusMessageCodePattern; ?>"  id="StatusMessageCode" value="<?php echo  $StatusMessageData[$i][1];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                            </td>
                                             <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="<?php echo $materialType[$i][1];?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $StatusMessageMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $StatusMessageMin;?>" name="StatusMessage" id="StatusMessage" value="<?php echo  $StatusMessageData[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" style="width: 150px;" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="<?php echo $materialType[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="StatusMessageDescription" required minlength="<?php echo $StatusMessageDescriptionMin;?>" maxlength="<?php echo $StatusMessageDescriptionMax; ?>"  pattern="<?php echo $StatusMessageDescriptionPattern; ?>"  id="StatusMessageDescription" value="<?php echo  $StatusMessageData[$i][3];?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
+ 
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
                                                 
-                                            </td>
-                                        </form>
-                                        <?php 
+                                          </form>
+                                                        </td>
+                                                        <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="StatusMessages.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                         </td><?php }else{?> <td></td>  <?php } ?>
+                                                </td>
+                                                    
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
                                         
-                                        </tr>
-                                        <?php }else{?>
-                                            
-                                            <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
-                                            <td>
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="StatusMessagesBack.php">
+                                                    <td>
+                                                <center><input type = "text" name="StatusMessageCode" required minlength="<?php echo $StatusMessageCodeMin;?>" maxlength="<?php echo $StatusMessageCodeMax; ?>"  pattern="<?php echo $StatusMessageCodePattern; ?>"  id="StatusMessageCode" value="<?php echo  $StatusMessageData[$i][3];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                            </td>
+                                                        <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $StatusMessageMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $StatusMessageMin;?>" name="StatusMessage" id="StatusMessage" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="StatusMessageDescription" required minlength="<?php echo $StatusMessageDescriptionMin;?>" maxlength="<?php echo $StatusMessageDescriptionMax; ?>"  pattern="<?php echo $StatusMessageDescriptionPattern; ?>"  id="StatusMessageDescription" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
+
                                             <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
-                                            </td>
-                                        </form>
-                                        
-                                        <?php 
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                   <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
-                                               
-                                               
-                                               
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="StatusMessages.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                            </td>
-                                        <?php }else{?> <td></td>  <?php } ?>
-                                        
-                                           
-
-
-
-                                        
-                                        </tr>
-                                            
-                                            
-                                       <?php }//else close
-                                     } //loop close
-                                        
-                                        ?>
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
+                                                    
+                                                    </tr>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
+                                    
                                     
                                 </div>
             </div>

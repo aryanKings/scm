@@ -97,34 +97,7 @@ function expand(textbox) {
                                                     
 ?>
 
-/*
- * 
- * Material Group Auto  fields add
- */
 
-function materialgroupname(j)
-{
-    if (j <= document.getElementById("materialgroup").rows.length) {
-        for (var i= document.getElementById("materialgroup").rows.length; i>j ;i--) {
-            var elName = "addRow[" + i + "]";
-            var newName = "addRow[" + (i+1) + "]";
-            var newClick = "materialgroupname(" + (i+1) + ")";
-            var modEl = document.getElementsByName(elName);
-
-            modEl.setAttribute("onclick", newClick);
-            document.getElementsByName("addRow[" + i + "]").setAttribute('name', "addRow[" + (i+1) + "]");
-        }
-    }
-    
-    var table=document.getElementById("materialgroup");
-    var row=table.insertRow(j);
-    var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
-     var i = "<form method='post' action='MaterialGroupBack.php'><td><center><input type = 'text' Maxlength='<?php echo $groupMax; ?>' required pattern='<?php echo $pattern;?>' minlength='<?php echo $groupMin;?>' name='MaterialGroup1' id='MaterialGroup1' value='' onkeyup='expand(this);' class='form-control input-md'></center></td><td><center><input type = 'text' name='MaterialGroupDescription1' minlength='<?php echo $groupDescMin;?>' maxlength='<?php echo $groupDescMax; ?>'  pattern='<?php echo $groupDesPattern; ?>'  id='MaterialGroupDescription1' value='' onkeyup='expand(this);' class='form-control input-md'></center></td><td><center><button type='submit' name='login-submit' id='login-submit'  class='btn btn-default'>Submit</button><input type='button' name='addRow["+ j + "]' class='add' onclick=\"materialgroupname(" + (j+1) + ")\" value='+' /></center></td></form>";   
-    row.innerHTML=i;
-   
-}
 </script>
 <style>
 .form-control {
@@ -145,10 +118,7 @@ function materialgroupname(j)
     -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
-input {
-    box-sizing: border-box;
-    width: 6em;
-}
+
 </style>
   </head>
 <body>
@@ -173,14 +143,16 @@ input {
         <button type="submit" class="btn btn-default"><img style="width:16px;height:16px;" src="images/magnifier13.png"></button>
       </form>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#" style="font-size:22px;">SCM Tools</a></li>
+        <li><a href="index.php" style="font-size:22px;">SCM Tools</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
 </div>
 </nav>
 
 <?php 
-        $addCounter = 1;
+            $materialGroupNumRows =  $database->getRowsnums("SELECT * FROM materialgroup");
+        $addCounter = $materialGroupNumRows;
+
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
            $addCounter = $increment+1;
@@ -204,38 +176,88 @@ input {
                                             <td>
                                             &nbsp;
                                             </td>
+<td>
+                                            &nbsp;
+                                            </td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         
                                         <?php 
-                                                $materialGroupData =  $database->getRowsDatabase("SELECT * FROM materialgroup");
-                                            for($i=1; $i<= $addCounter; $i++){?>
+                                            $materialGroupData =  $database->getRowsDatabase("SELECT * FROM materialgroup");
+
+
+                                            for($i=0; $i< $addCounter; $i++){
+                                                
+                                                if(isset($materialGroupData[$i])){
+                                                
+                                                ?>
+                                                
                                                 <tr>
                                                     <form method="post" action="MaterialGroupBack.php">
                                                         <td>
                                                             
-                                                            <center><input type = "text" Maxlength="<?php echo $groupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $groupMin;?>" name="MaterialGroup" id="MaterialGroup1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                            <center><input type = "text" Maxlength="<?php echo $groupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $groupMin;?>" name="MaterialGroup" id="MaterialGroup1" value="<?php echo $materialGroupData[$i][1]; ?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                        </td>
+                                                        <td>
+                                                            <center><input type = "text" name="MaterialGroupDescription" style="width: 150px;" minlength="<?php echo $groupDescMin;?>" maxlength="<?php echo $groupDescMax; ?>"  pattern="<?php echo $groupDesPattern; ?>"  id="MaterialGroupDescription1" value="<?php echo $materialGroupData[$i][2]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                        </td>
+                                                        <td>
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                        <?php 
+                                        $showAdd = $addCounter -1;
+                                        if($i == $showAdd){?>
+                                                 <td>
+
+                                                            <form action="MaterialGroup.php" method="get">
+                                                        <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
+                                                        <input type="submit" name="addRow"  class="add" value='+' />
+                                                    </form> 
+                                                </td>
+                                                    
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
+                                        
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="MaterialGroupBack.php">
+                                                        <td>
+                                                            
+                                                            <center><input type = "text" Maxlength="<?php echo $groupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $groupMin;?>" name="MaterialGroup" id="MaterialGroup1" value=""  onkeyup="expand(this);" class="form-control input-md"></center>
                                                         </td>
                                                         <td>
                                                             <center><input type = "text" name="MaterialGroupDescription" minlength="<?php echo $groupDescMin;?>" maxlength="<?php echo $groupDescMax; ?>"  pattern="<?php echo $groupDesPattern; ?>"  id="MaterialGroupDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                                         </td>
                                                         <td>
                                                         <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                            
+  </form>
                                                         </td>
-                                                    </form>
-                                                    
-                                                    <form action="MaterialGroup.php" method="get">
-                                                       
+                                                   <?php 
+                                        $showAdd = $addCounter -1;
+                                        if($i == $showAdd){?>
+                                                 <td>
+
+                                                            <form action="MaterialGroup.php" method="get">
+                                                        <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
-                                                    </form>
+                                                    </form> 
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
                                                     
                                                     </tr>
-                                        
-                                           <?php }
-                                        
-                                        ?>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
                                     

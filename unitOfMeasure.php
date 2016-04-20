@@ -4,16 +4,7 @@
     $database =  new connect();
 
 
-    /*
-     * GET RESULTS  
-     */
-     function materialValidationResult($query){
-        $materialQueryresult = mysql_query($query);
-        $row = mysql_fetch_array($materialQueryresult);
-        return $row;
-    }
      
-    
      /*
       * PATTERN MATCHING 
       */
@@ -40,12 +31,11 @@
                                                     }
      
      
-   
-    $materialValidation =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='materialType'");
-    
-    
   
-   $materialDescription =  $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='materialTypeDescription'");
+    
+      $UoMCode =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='UoMCode'");
+
+   $UoMDescription= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='UoMDescription'");
 ?>
 
 <!DOCTYPE html>
@@ -87,20 +77,18 @@ function expand(textbox) {
 }
 
 <?php 
-                                                    // material Type
-                                                    $TypeMax =  $materialValidation[0]['maxlen'];
-                                                    $TypeMin = $materialValidation[0]['minlen'];
-                                                    $pattern =  patternMatching($TypeMax, $TypeMin, $materialValidation[0]);
-                                                  
+                                                    // UoM Code
+                                                    $UoMCodeMax =  $UoMCode[0]['maxlen'];
+                                                    $UoMCodeMin = $UoMCode[0]['minlen'];
+                                                    $pattern =  patternMatching($UoMCodeMax, $UoMCodeMin, $UoMCode[0]);
                                                     
-                                                    
-                                                    // material description
-                                                    $TypeDescMax =  $materialDescription[0]['maxlen'];
-                                                    $TypeDescMin =  $materialDescription[0]['minlen'];
-                                                    $TypeDesPattern =  patternMatching($TypeDescMax, $TypeDescMin, $materialDescription[0]);
-
+                                                    // UoM description
+                                                    $UoMDescriptionMax =  $UoMDescription[0]['maxlen'];
+                                                    $UoMDescriptionMin =  $UoMDescription[0]['minlen'];
+                                                    $UoMDescriptionPattern =  patternMatching($UoMDescriptionMax, $UoMDescriptionMin, $UoMDescription[0]);
                                                     
 ?>
+
 
 
 </script>
@@ -155,19 +143,13 @@ function expand(textbox) {
 </div>
 </nav>
 <?php 
+$UoMNums =  $database->getRowsnums("SELECT * FROM unitofmeasure");
 
-
-      $typeNumber = $database->getRowsnums("SELECT * FROM materialtype");
-      
-     if($typeNumber == -1){
-          $addCounter = 1;
-     }else if($typeNumber == 0){
-     
-     $addCounter = 1;
-     
-     }else{
-         $addCounter =  $typeNumber;
-     }
+if($UoMNums == 0 or $orNums== -1){
+    $addCounter = 1;
+}else{
+    $addCounter = $UoMNums;
+}
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
@@ -179,15 +161,15 @@ function expand(textbox) {
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Type</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4>Unit of Measure</h4></center> 
+                                <table class="table table-striped"  id="UoM">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Type
+                                            UoM Code
                                             </td>
                                             <td>
-                                            Material Type Description  
+                                          UoM Description  
                                             </td>
                                             <td>
                                             &nbsp;
@@ -198,88 +180,81 @@ function expand(textbox) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                      <?php 
-                                        $materialType =  $database->getRowsDatabase("SELECT * FROM materialtype");
+                                       <?php 
+                                            $uomData =  $database->getRowsDatabase("SELECT * FROM unitofmeasure");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($materialType[$i])){
+                                                if(isset($uomData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
+                                        <form method="post" action="unitOfMeasureBack.php">
                                             <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="<?php echo $materialType[$i][1];?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $UoMCodeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $UoMCodeMin;?>" name="UoMCode" id="UoMCode" value="<?php echo $uomData[$i][1]; ?>"  onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" style="width: 150px;" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="<?php echo $materialType[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="UoMDescription" minlength="<?php echo $UoMDescriptionMin;?>" maxlength="<?php echo $UoMDescriptionMax; ?>"  pattern="<?php echo $UoMDescriptionPattern; ?>"  id="UoMDescription" value="<?php echo $uomData[$i][2]; ?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
+                                                </form>  
                                             </td>
-                                        </form>
                                         <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
                                            <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="UnitOfMeasure.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                         </td><?php }else{?> <td></td>  <?php } ?>
+</td>
                                         
-                                        </tr>
-                                        <?php }else{?>
-                                            
-                                            <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
-                                            <td>
-                                                
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
-                                            </td>
-                                            <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
-                                            </td>
-                                            <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
-                                            </td>
-                                        </form>
+                                          
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
                                         
-                                        <?php 
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="unitOfMeasureBack.php">
+                                                        <td>
+                                                            
+                                                            <center><input type = "text" Maxlength="<?php echo $UoMCodeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $UoMCodeMin;?>" name="UoMCode" id="UoMCode" value=""  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                        </td>
+                                                        <td>
+                                                            <center><input type = "text" minlength="<?php echo $UoMDescriptionMin;?>" maxlength="<?php echo $UoMDescriptionMax; ?>"  pattern="<?php echo $UoMDescriptionPattern; ?>"  id="UoMDescription"  name="UoMDescription"  value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                        </td>
+                                                        <td>
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                   <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
-                                               
-                                               
-                                               
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="UnitOfMeasure.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                            </td>
-                                        <?php }else{?> <td></td>  <?php } ?>
-                                        
-                                           
-
-
-
-                                        
-                                        </tr>
-                                            
-                                            
-                                       <?php }//else close
-                                     } //loop close
-                                        
-                                        ?>
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
+                                                    
+                                                    </tr>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
+                                    
                                     
                                 </div>
             </div>

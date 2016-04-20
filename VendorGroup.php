@@ -4,16 +4,7 @@
     $database =  new connect();
 
 
-    /*
-     * GET RESULTS  
-     */
-     function materialValidationResult($query){
-        $materialQueryresult = mysql_query($query);
-        $row = mysql_fetch_array($materialQueryresult);
-        return $row;
-    }
      
-    
      /*
       * PATTERN MATCHING 
       */
@@ -40,12 +31,11 @@
                                                     }
      
      
-   
-    $materialValidation =  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='materialType'");
-    
-    
   
-   $materialDescription =  $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='materialTypeDescription'");
+    
+      $VendorGroup=  $database->getRowsDatabase("SELECT  * FROM validations WHERE feildname='VendorGroup'");
+
+   $VendorDescription= $database->getRowsDatabase("SELECT * FROM validations WHERE feildname='VendorGroupDescription'");
 ?>
 
 <!DOCTYPE html>
@@ -87,18 +77,15 @@ function expand(textbox) {
 }
 
 <?php 
-                                                    // material Type
-                                                    $TypeMax =  $materialValidation[0]['maxlen'];
-                                                    $TypeMin = $materialValidation[0]['minlen'];
-                                                    $pattern =  patternMatching($TypeMax, $TypeMin, $materialValidation[0]);
-                                                  
+                                                    // Vendor Group
+                                                    $VendorGroupMax =  $VendorGroup[0]['maxlen'];
+                                                    $VendorGroupMin = $VendorGroup[0]['minlen'];
+                                                    $pattern =  patternMatching($VendorGroupMax, $VendorGroupMin, $VendorGroup[0]);
                                                     
-                                                    
-                                                    // material description
-                                                    $TypeDescMax =  $materialDescription[0]['maxlen'];
-                                                    $TypeDescMin =  $materialDescription[0]['minlen'];
-                                                    $TypeDesPattern =  patternMatching($TypeDescMax, $TypeDescMin, $materialDescription[0]);
-
+                                                    // Vendor description
+                                                    $VendorDescriptionMax =  $VendorDescription[0]['maxlen'];
+                                                    $VendorDescriptionMin =  $VendorDescription[0]['minlen'];
+                                                    $VendorDescriptionPattern =  patternMatching($VendorDescriptionMax, $VendorDescriptionMin, $VendorDescription[0]);
                                                     
 ?>
 
@@ -155,19 +142,13 @@ function expand(textbox) {
 </div>
 </nav>
 <?php 
+$VendorNums =  $database->getRowsnums("SELECT * FROM vendorgroup");
 
-
-      $typeNumber = $database->getRowsnums("SELECT * FROM materialtype");
-      
-     if($typeNumber == -1){
-          $addCounter = 1;
-     }else if($typeNumber == 0){
-     
-     $addCounter = 1;
-     
-     }else{
-         $addCounter =  $typeNumber;
-     }
+if($VendorNums == 0 or $VendorNums== -1){
+    $addCounter = 1;
+}else{
+    $addCounter = $VendorNums;
+}
        
        if(isset($_GET['addRow'])){
            $increment =  intval($_GET['increment']);
@@ -179,15 +160,15 @@ function expand(textbox) {
 <div class="container">
                 
                             <div class="col-md-8 table-responsive">
-                                       <center><h4>Material Type</h4></center> 
-                                <table class="table table-striped"  id="materialType">
+                                       <center><h4> Vendor Group</h4></center> 
+                                <table class="table table-striped"  id="Vendor">
                                      <thead>
                                         <tr>
                                             <td>
-                                            Material Type
+                                            Vendor Group
                                             </td>
                                             <td>
-                                            Material Type Description  
+                                          Vendor Description  
                                             </td>
                                             <td>
                                             &nbsp;
@@ -199,87 +180,80 @@ function expand(textbox) {
                                     </thead>
                                     <tbody>
                                       <?php 
-                                        $materialType =  $database->getRowsDatabase("SELECT * FROM materialtype");
+                                            $vendorData =  $database->getRowsDatabase("SELECT * FROM vendorgroup");
                                             for($i=0; $i< $addCounter; $i++){
                                                 
-                                                if(isset($materialType[$i])){
+                                                if(isset($vendorData[$i])){
                                                 ?>
                                         <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
+                                        <form method="post" action="VendorGroupBack.php">
                                             <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="<?php echo $materialType[$i][1];?>"  onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $VendorGroupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $VendorGroupMin;?>" name="VendorGroup" id="VendorGroup" value="<?php echo $vendorData[$i][1];?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" style="width: 150px;" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="<?php echo $materialType[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="VendorDescription" minlength="<?php echo $VendorDescriptionMin;?>" maxlength="<?php echo $VendorDescriptionMax; ?>"  pattern="<?php echo $VendorDescriptionPattern; ?>"  id="VendorDescription" value="<?php echo $vendorData[$i][2];?>" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
                                             <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
                                                 
-                                            </td>
-                                        </form>
-                                        <?php 
+                                          </form>
+                                                        </td>
+                                                        <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="VendorGroup.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                         </td><?php }else{?> <td></td>  <?php } ?>
+                                                </td>
+                                                    
+                                                 <?php }else{?> <td></td>  <?php } ?>
+
+                                                    </tr>
                                         
-                                        </tr>
-                                        <?php }else{?>
-                                            
-                                            <tr>
-                                        <form method="post" action="MaterialTypeBack.php">
-                                            
-                                           
-                                            <td>
+                                           <?php  }else { ?>
+                                               
+                                               
+                                                <tr>
+                                                    <form method="post" action="VendorGroupBack.php">
+                                                        <td>
                                                 
-                                                <center><input type = "text" Maxlength="<?php echo $TypeMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $TypeMin;?>" name="MaterialType" id="MaterialType1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" Maxlength="<?php echo $VendorGroupMax; ?>" required pattern="<?php echo $pattern;?>" minlength="<?php echo $VendorGroupMin;?>" name="VendorGroup" id="VendorGroup" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                                <center><input type = "text" name="MaterialTypeDescription" minlength="<?php echo $TypeDescMin;?>" maxlength="<?php echo $TypeDescMax; ?>"  pattern="<?php echo $TypeDesPattern; ?>"  id="MaterialTypeDescription1" value="" onkeyup="expand(this);" class="form-control input-md"></center>
+                                                <center><input type = "text" name="VendorDescription" minlength="<?php echo $VendorDescriptionMin;?>" maxlength="<?php echo $VendorDescriptionMax; ?>"  pattern="<?php echo $VendorDescriptionPattern; ?>"  id="VendorDescription" value="" onkeyup="expand(this);" class="form-control input-md"></center>
                                             </td>
                                             <td>
-                                            <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
-                                                
-                                            </td>
-                                        </form>
-                                        
-                                        <?php 
+                                                        <button type="submit" name="login-submit" id="login-submit"  class="btn btn-default">Submit</button>
+  </form>
+                                                        </td>
+                                                   <?php 
                                         $showAdd = $addCounter -1;
                                         if($i == $showAdd){?>
-                                           <td>
-                                               
-                                               
-                                               
+                                                 <td>
 
-                                                            <form action="MaterialType.php" method="get">
+                                                            <form action="VendorGroup.php" method="get">
                                                         <input type="hidden" name="increment" value="<?php echo $addCounter;?>" />
                                                         <input type="submit" name="addRow"  class="add" value='+' />
                                                     </form> 
-                                            </td>
-                                        <?php }else{?> <td></td>  <?php } ?>
-                                        
-                                           
-
-
-
-                                        
-                                        </tr>
-                                            
-                                            
-                                       <?php }//else close
-                                     } //loop close
-                                        
-                                        ?>
+                                                </td>
+                                            <?php }else{?> <td></td>  <?php } ?>                                                    
+                                                   
+                                                    
+                                                    </tr>
+                                               
+                                    <?php
+                                    
+                                           }//else close
+                                     }//loop close 
+                                     
+                                    ?>
                                     </tbody>
                                     </table>
+                                    
                                     
                                 </div>
             </div>
